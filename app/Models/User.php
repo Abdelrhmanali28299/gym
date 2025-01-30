@@ -23,7 +23,8 @@ class User extends Authenticatable
         'end_subscription_date',
         'phone',
         'price',
-        'visits_number'
+        'visits_number',
+        'code'
     ];
 
     /**

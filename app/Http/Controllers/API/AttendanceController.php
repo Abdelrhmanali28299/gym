@@ -30,7 +30,7 @@ class AttendanceController extends Controller
     public function add(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'attendances.*.user_id' => 'required',
+            'attendances.*.code' => 'required',
             'attendances.*.attendance_date' => 'required|date:Y-m-d H:i:s',
         ]);
 
@@ -41,8 +41,10 @@ class AttendanceController extends Controller
             ], 404);
         }
         foreach ($request->attendances as $attendance) {
-            $user = User::find($attendance['user_id']);
-
+            $user = User::where('code', $attendance['code'])->first();
+            if (!$user) {
+                continue;
+            }
             if (strtotime($user->end_subscription_date) <= strtotime($attendance['attendance_date'])) {
                 return response()->json([
                     'status' => 404,
@@ -51,7 +53,7 @@ class AttendanceController extends Controller
             }
 
             Attendance::create([
-                'user_id' => $attendance['user_id'],
+                'user_id' => $user->id,
                 'attendance_date' => $attendance['attendance_date']
             ]);
         }

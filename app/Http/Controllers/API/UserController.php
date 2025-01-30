@@ -22,7 +22,8 @@ class UserController extends Controller
                 'phone' => $user->phone,
                 'price' => $user->price,
                 'visits_number' => $user->visits_number,
-                'attendance_count' => $user->attendances()->count()
+                'attendance_count' => $user->attendances()->count(),
+                'code' => $user->code ?? ''
             ];
         }
 
@@ -40,7 +41,8 @@ class UserController extends Controller
             'end_subscription_date' => 'required|date',
             'phone' => 'required',
             'price' => 'required',
-            'visits_number' => 'required'
+            'visits_number' => 'required',
+            'code' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -57,6 +59,7 @@ class UserController extends Controller
         $user->phone = $request->phone;
         $user->price = $request->price;
         $user->visits_number = $request->visits_number;
+        $user->code = $request->code;
         $user->save();
 
         return [
@@ -70,10 +73,13 @@ class UserController extends Controller
     {
         $user = User::find($id);
         if (!$user) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'User not found'
-            ], 404);
+            $user = User::where('code', $id)->first();
+            if (!$user) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'User not found'
+                ], 404);
+            }
         }
 
         $validator = Validator::make($request->all(), [
